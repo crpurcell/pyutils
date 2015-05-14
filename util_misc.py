@@ -13,8 +13,8 @@
 #  run_command       ... run a system command using os.system                 #
 #  config_read       ... parse a key=value configuration file                 #
 #  ascii_dat_read    ... read the columns from an ascii or csv file           #
-#  lst_dir           ... list and filter the contents of the current dir      #
 #  lst_to_float      ... convert the elements in a list to floats             #
+#  lst_dir           ... list and filter the contents of the current dir      #
 #  dms2deg           ... convert sexigesimal to degrees                       #
 #  deg2dms           ... convert degrees to sexigesimal                       #
 #  calc_linear_sep   ... linear separation between two points                 #
@@ -30,14 +30,17 @@
 #  calc_stats_old    ... calculate the statistics of an array (fails)         #
 #  calc_stats        ... calculate the statistics of an array (uses masking)  #
 #  calc_clipped_stats .. calculate the stats after sigma-clipping             #
+#  calc_clipped_stats_old ... calculate the stats after sigma-clipping (old)  #
 #  polystr_to_arr    ... convert a string of coords to a polygon vertex array #
+#  parse_poly_string ... alias for above polystr_to_arr                       #
 #  check_overlap     ... check for overlap of two squares on sky              #
 #  sort_nicely       ... sort a list in human order                           #
-#  select_into_namedlst . select from a DB into a named list                  #
+#  select_into_namedlst ... select from a DB into a named list                #
 #  rowlst_to_rowdict ... convert a named list into a named dictionary         #
 #  env_var_app       ... append a string to an environment variable           #
 #  env_var_pre       ... prepend a string to an environment variable          #
 #  spawnDaemon       ... call an executable file as a detached procress       #
+#  read_poly_file    ... parse an ASCII file containing POLY strings
 #  to_precision      ... return a formateed string representation of x        #
 #                                                                             #
 #=============================================================================#
@@ -58,18 +61,17 @@ import pyslalib as sla
 
 
 #-----------------------------------------------------------------------------#
-# Feedback messages to the user delimited by two lines of '-' signs.          #
-#-----------------------------------------------------------------------------#
 def message (string):
+    """Print a messages to the user delimited by two lines of '-' signs"""
+
     print "\n"+"-"*80
     print ">>> %s" % string
     print "-"*80
 
 
 #-----------------------------------------------------------------------------#
-# Execute system command (e.g., a miriad task)                                #
-#-----------------------------------------------------------------------------#
 def run_command(command, doPrint=True):
+    """Execute a system command (e.g., a miriad task)"""
 
     # Clean up the spaces in the command
     spaces = re.compile('\s+')
@@ -85,9 +87,8 @@ def run_command(command, doPrint=True):
 
 
 #-----------------------------------------------------------------------------#
-# Read a configuration file and output a 'KEY=VALUE' dictionary               #
-#-----------------------------------------------------------------------------#
 def config_read(filename, delim='=', doValueSplit=True):
+    """Read a configuration file and output a 'KEY=VALUE' dictionary"""
     
     configTable = {}
     CONFIGFILE = open(filename, "r")
@@ -135,9 +136,8 @@ def config_read(filename, delim='=', doValueSplit=True):
 
 
 #-----------------------------------------------------------------------------#
-# Read the columns in an ASCII or CSV file                                    #
-#-----------------------------------------------------------------------------#
-def ascii_dat_read(filename, delim=",", doNone=False, doFloatCols=[]):
+def ascii_dat_read(filename, delim=",", doNone=False, doFloatCols=[]):#
+    """Read the columns in an ASCII or CSV file"""
 
     columnDict = {}
     configTable = {}
@@ -218,9 +218,9 @@ def ascii_dat_read(filename, delim=",", doNone=False, doFloatCols=[]):
 
 
 #-----------------------------------------------------------------------------#
-# Convert the elements in a list to floats, catch errors                      #
-#-----------------------------------------------------------------------------#
 def lst_to_float(lst, blank='none'):
+    """Convert the elements in a list to floats, catch errors"""
+    
     for i in range(len(lst)):
         try:
             lst[i] = float(lst[i])
@@ -232,10 +232,10 @@ def lst_to_float(lst, blank='none'):
 
     return lst
     
-#-----------------------------------------------------------------------------#
-# List the files in the current directory, filter according to a regexp       #
+
 #-----------------------------------------------------------------------------#
 def lst_dir(dir,regexp='^.*\..*$'):
+    """List the files in the current directory, filter according to a regexp"""
     
     dirLst = os.listdir(dir)
     pattern = re.compile(regexp)
@@ -249,9 +249,8 @@ def lst_dir(dir,regexp='^.*\..*$'):
 
 
 #-----------------------------------------------------------------------------#
-# Convert DD:MM:DD.D coordinates to decimal degrees.                          #
-#-----------------------------------------------------------------------------#
 def dms2deg(dms):
+    """Convert DD:MM:DD.D coordinates to decimal degrees"""
     
     try:
         delim = re.compile('[,| |:|h|d|m|s]')
@@ -268,9 +267,8 @@ def dms2deg(dms):
     
 
 #-----------------------------------------------------------------------------#
-# Convert a float in degrees to 'dd mm ss' format                             #
-#-----------------------------------------------------------------------------#
 def deg2dms(deg, delim=':', doSign=False, nPlaces=2):
+    """Convert a float in degrees to 'dd mm ss' format"""
 
     try:
         angle = abs(deg)
@@ -308,9 +306,8 @@ def deg2dms(deg, delim=':', doSign=False, nPlaces=2):
 
     
 #-----------------------------------------------------------------------------#
-# Calculate the linear separation between two points                          #
-#-----------------------------------------------------------------------------#
 def calc_linear_sep(x1, y1, x2, y2):
+    """Calculate the linear separation between two points"""
     
     x1 = float(x1)
     y1 = float(y1)
@@ -321,9 +318,8 @@ def calc_linear_sep(x1, y1, x2, y2):
 
 
 #-----------------------------------------------------------------------------#
-# Calculate the seperation on a curved surface                                #
-#-----------------------------------------------------------------------------#
 def get_separation(x1_deg, y1_deg, x2_deg, y2_deg):
+    """Calculate the seperation on a curved surface"""
 
     sep_deg = None
     try:
@@ -346,9 +342,8 @@ def get_separation(x1_deg, y1_deg, x2_deg, y2_deg):
 
 
 #-----------------------------------------------------------------------------#
-# Calculate the seperation between two points and check if same               #
-#-----------------------------------------------------------------------------#
 def check_sep(x1_deg, y1_deg, x2_deg, y2_deg, minSep_deg):
+    """Calculate the seperation between two points and check if same"""
 
     sep_deg = get_separation(x1_deg, y1_deg, x2_deg, y2_deg)
 
@@ -360,9 +355,8 @@ def check_sep(x1_deg, y1_deg, x2_deg, y2_deg, minSep_deg):
 
 
 #-----------------------------------------------------------------------------#
-# Used with 'sort' to sort numeric strings as numbers                         #
-#-----------------------------------------------------------------------------#
 def numeric_compare(x, y):
+    """Used with 'sort' to sort numeric strings as numbers"""
     
     if float(x)>float(y):
         return 1
@@ -373,9 +367,8 @@ def numeric_compare(x, y):
 
 
 #-----------------------------------------------------------------------------#
-# Format a number to a string                                                 #
-#-----------------------------------------------------------------------------#
 def num2str(num, pre=2, post=2, dosign=False, do_zeros=False, doplus=True):
+    """Format a number to a string"""
     
     num=float(num)
     if do_zeros:
@@ -411,8 +404,6 @@ def nanmean(arr, **kwargs):
 
 
 #-----------------------------------------------------------------------------#
-# Returns median ignoring NAN                                                 #
-#-----------------------------------------------------------------------------#
 def nanmedian(arr, **kwargs):
     """
     Returns median ignoring NAN
@@ -431,14 +422,12 @@ def nanstd(arr, **kwargs):
 
 
 #-----------------------------------------------------------------------------#
-# Median Absolute Deviation From Median (MADFM) - Adam Ginsburg's code.       #
-#-----------------------------------------------------------------------------#
 def MAD(a, c=0.6745, axis=None):
     """
     Median Absolute Deviation along given axis of an array:
     median(abs(a - median(a))) / c
     c = 0.6745 is the constant to convert from MAD to std
-
+     - Adam Ginsburg's code.
     """
     
     a = ma.masked_where(a!=a, a)
@@ -458,9 +447,8 @@ def MAD(a, c=0.6745, axis=None):
 
 
 #-----------------------------------------------------------------------------#
-# Resample the data array by a factor. Copied from APLpy                      #
-#-----------------------------------------------------------------------------#
 def resample(array, factor):
+    """Resample the data array by a factor. Copied from APLpy"""
     
     nx, ny = np.shape(array)
     nx_new = nx / factor
@@ -478,9 +466,8 @@ def resample(array, factor):
 
 
 #-----------------------------------------------------------------------------#
-# Calculate the statistics of an array                                        #
-#-----------------------------------------------------------------------------#
 def calc_stats_old(a, maskzero=False):
+    """Calculate the statistics of an array"""
     
     statsDict = {}
     a = np.array(a)
@@ -515,8 +502,6 @@ def calc_stats_old(a, maskzero=False):
     return statsDict
 
 
-#-----------------------------------------------------------------------------#
-# Calculate the statistics of an array (masked version)                       #
 #-----------------------------------------------------------------------------#
 def calc_stats(a, maskzero=False):
     """
@@ -558,14 +543,10 @@ def calc_stats(a, maskzero=False):
 
 
 #-----------------------------------------------------------------------------#
-# Calculate the mean and stdev of an array given a sigma clip                 #
-#-----------------------------------------------------------------------------#
 def calc_clipped_stats(data, clip=3.0, nIter=10, maskzero=False):
+    """Calculate the mean and stdev of an array given a sigma clip"""
 
-    if maskzero:
-        data = np.where( np.equal(data, 0.0), np.nan, data)
-        
-    ms = calc_stats(data)
+    ms = calc_stats(data, maskzero=maskzero)
 
     if clip>0 and nIter>0:
         convergeFlg = 0
@@ -591,9 +572,8 @@ def calc_clipped_stats(data, clip=3.0, nIter=10, maskzero=False):
 
 
 #-----------------------------------------------------------------------------#
-# Calculate the mean and stdev of an array given a sigma clip                 #
-#-----------------------------------------------------------------------------#
 def calc_clipped_stats_old(data, clip=3.0, nIter=10):
+    """Calculate the mean and stdev of an array given a sigma clip"""
     
     data = np.array(data).flatten()
     
@@ -654,9 +634,8 @@ def calc_clipped_stats_old(data, clip=3.0, nIter=10):
 
 
 #-----------------------------------------------------------------------------#
-# Convert the polygon strings to numpy arrays 2XN                             #
-#-----------------------------------------------------------------------------#
-def polystr_to_arr(polystr):
+def polystr_to_arr(polystr):#
+    """Convert the polygon strings to numpy arrays 2XN"""
     try: 
         polystrLst = polystr.split(',')
     except Exception:
@@ -675,16 +654,15 @@ def polystr_to_arr(polystr):
 
 
 #-----------------------------------------------------------------------------#
-# Convert the polygon strings to numpy arrays 2XN                             #
-#-----------------------------------------------------------------------------#
 def parse_poly_string(poly):
+    """Alias for polystr_to_arr"""
+    
     return polystr_to_arr(poly)
 
 
 #-----------------------------------------------------------------------------#
-# Check for overlap of two squares in RA and Dec or l and b.                  #
-#-----------------------------------------------------------------------------#
 def check_overlap(x1, y1, width1, height1, x2, y2, width2, height2):
+    """Check for overlap of two squares in RA and Dec or l and b"""
 
     xOverlap=False; yOverlap=False
 
@@ -781,9 +759,8 @@ def check_overlap(x1, y1, width1, height1, x2, y2, width2, height2):
 
 
 #-----------------------------------------------------------------------------#
-# Sort in human order                                                         #
-#-----------------------------------------------------------------------------#
 def sort_nicely( l ):
+    """Sort in human order"""
     
   convert = lambda text: int(text) if text.isdigit() else text 
   alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ] 
@@ -791,17 +768,16 @@ def sort_nicely( l ):
 
 
 #-----------------------------------------------------------------------------#
-# Sort multiple lists                                                         #
-#-----------------------------------------------------------------------------#
 def sort_lists_by(lists, key_list=0, desc=False):
+    """Sort multiple lists using the first list as a key"""
+
     return zip(*sorted(izip(*lists), reverse=desc,
                  key=lambda x: x[key_list]))
 
 
 #-----------------------------------------------------------------------------#
-# Store the results of a select statement into a list of dictionaries         #
-#-----------------------------------------------------------------------------#
 def select_into_namedlst(cursor, sql, args=[]):
+    """Store the results of a select statement into a list of dictionaries"""
 
     rowLst = []
     if args == []:
@@ -819,9 +795,9 @@ def select_into_namedlst(cursor, sql, args=[]):
 
 
 #-----------------------------------------------------------------------------#
-# Convert a list of dictionaries into a dictionary of dictionaries            #
-#-----------------------------------------------------------------------------#
 def rowlst_to_rowdict(rowLst, keyName):
+    """Convert a list of dictionaries into a dictionary of dictionaries"""
+    
     rowDict = {}
     for e in rowLst:
         key = e.pop(keyName)
@@ -831,9 +807,9 @@ def rowlst_to_rowdict(rowLst, keyName):
 
 
 #-----------------------------------------------------------------------------#
-# Append a string to an environment variable                                  #
-#-----------------------------------------------------------------------------#
 def env_var_app(key,value,delim=':'):
+    """Append a string to an environment variable"""
+    
     if os.environ.has_key(key):
         os.environ[key]+=delim+str(value)
     else:
@@ -841,17 +817,15 @@ def env_var_app(key,value,delim=':'):
 
 
 #-----------------------------------------------------------------------------#
-# Prepend a string to an environment variable                                 #
-#-----------------------------------------------------------------------------#
 def env_var_pre(key,value,delim=':'):
+    """Prepend a string to an environment variable"""
+    
     if os.environ.has_key(key):
         os.environ[key]=str(value)+delim+os.environ[key]
     else:
          os.environ[key]=str(value)
 
     
-#-----------------------------------------------------------------------------#
-# Call an executable file as a detached procress                              #
 #-----------------------------------------------------------------------------#
 def spawnDaemon(path_to_executable, *args):
     """Spawn a completely detached subprocess (i.e., a daemon).
