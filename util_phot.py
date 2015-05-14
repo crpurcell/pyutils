@@ -34,11 +34,11 @@ import sys
 import math as m
 import numpy as np
 try:
-    import pyfits as pf
-    import pywcs as pw
-except ImportError:
     import astropy.io.fits as pf
     import astropy.wcs.wcs as pw
+except ImportError:
+    import pyfits as pf
+    import pywcs as pw
 from shapely.geometry import Polygon as Polyshape
 from matplotlib.path import Path
 
