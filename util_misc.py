@@ -762,9 +762,9 @@ def check_overlap(x1, y1, width1, height1, x2, y2, width2, height2):
 def sort_nicely( l ):
     """Sort in human order"""
     
-  convert = lambda text: int(text) if text.isdigit() else text 
-  alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ] 
-  l.sort( key=alphanum_key ) 
+    convert = lambda text: int(text) if text.isdigit() else text 
+    alphanum_key = lambda key: [convert(c) for c in re.split('([0-9]+)', key)] 
+    l.sort( key=alphanum_key ) 
 
 
 #-----------------------------------------------------------------------------#
