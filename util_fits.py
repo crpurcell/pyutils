@@ -5,7 +5,7 @@
 #                                                                             #
 # PURPOSE:  Utility functions to operate on FITS data.                        #
 #                                                                             #
-# MODIFIED: 14-May-2015 by C. Purcell                                         #
+# MODIFIED: 17-Dec-2016 by C. Purcell                                         #
 #                                                                             #
 # CONTENTS:                                                                   #
 #                                                                             #
@@ -29,11 +29,6 @@
 #  biscuit_cutter    ... cut a sub portion from a FITS cube (OLD)             #
 #  biscuit_cutter_swarp  cut a sub portion from a FITS map using SWARP        #
 #  query_fits_map    ... query the value at a position in a FITS image        #
-#                                                                             #
-# TODO:                                                                       #
-#                                                                             #
-#  * Update older wcs.sky2pix to wcs.world2pix                                #
-#                                                                             #
 #                                                                             #
 #=============================================================================#
 import os
@@ -87,10 +82,10 @@ def mkWCSDict(header, wrapX180=False, forceCheckDims=5):
     if header['NAXIS']>=3:
         zCent_pix = float(header['NAXIS3']) /2.0 + 0.5
         [[w['xcent'], w['ycent'], w['zcent']]] = \
-                       wcs3D.wcs_pix2sky([(xCent_pix, yCent_pix, zCent_pix)],1)
+                       wcs3D.wcs_pix2world([(xCent_pix, yCent_pix, zCent_pix)],1)
     else:
         [[w['xcent'], w['ycent']]] = \
-                       wcs2D.wcs_pix2sky([(xCent_pix,yCent_pix)],1)
+                       wcs2D.wcs_pix2world([(xCent_pix,yCent_pix)],1)
     if wrapX180:
         if w['xcent']>180.0:
             w['xcent'] = w['xcent'] - 360.0
@@ -106,9 +101,9 @@ def mkWCSDict(header, wrapX180=False, forceCheckDims=5):
     w['ymax'] = np.hsplit(a, 2)[1].max()
     if header['NAXIS']>=3:
         [[dummy1, dummy2, z1]] = \
-               wcs3D.wcs_pix2sky([(xCent_pix, yCent_pix, 1.0)], 1)
+               wcs3D.wcs_pix2world([(xCent_pix, yCent_pix, 1.0)], 1)
         [[dummy1, dummy2, z2]] = \
-               wcs3D.wcs_pix2sky([(xCent_pix, yCent_pix, header['NAXIS3'])], 1)
+               wcs3D.wcs_pix2world([(xCent_pix, yCent_pix, header['NAXIS3'])], 1)
         w['zmin'] = min([z1, z2])
         w['zmax'] = max([z1, z2])
     if wrapX180:
@@ -128,15 +123,15 @@ def mkWCSDict(header, wrapX180=False, forceCheckDims=5):
     # Determine the pixel scale at the refpix
     if header['NAXIS']>=3:
         crpix = np.array(wcs3D.wcs.crpix)
-        [[x1, y1, z1]] = wcs3D.wcs_pix2sky([crpix], 1)
+        [[x1, y1, z1]] = wcs3D.wcs_pix2world([crpix], 1)
         crpix += 1.0
-        [[x2, y2, z2]] = wcs3D.wcs_pix2sky([crpix], 1)
+        [[x2, y2, z2]] = wcs3D.wcs_pix2world([crpix], 1)
         w['zdelt'] = z2 - z1
     else:
         crpix = np.array(wcs2D.wcs.crpix)
-        [[x1, y1]] = wcs2D.wcs_pix2sky([crpix], 1)
+        [[x1, y1]] = wcs2D.wcs_pix2world([crpix], 1)
         crpix -= 1.0
-        [[x2, y2]] = wcs2D.wcs_pix2sky([crpix], 1)
+        [[x2, y2]] = wcs2D.wcs_pix2world([crpix], 1)
     cosy = m.cos( m.radians((y1 + y2) / 2.0) )
     w['xdelt'] = (x2 - x1) * cosy
     w['ydelt'] = y2 - y1
@@ -654,7 +649,7 @@ def get_subfits(inFileName, x_deg, y_deg, radius_deg, zMin_w=None, zMax_w=None,
     wcs2D = pw.WCS(w['header2D'])
     
     # Find the pixel at the center of the new sub-image
-    [ [xCent_pix, yCent_pix] ] = wcs2D.wcs_sky2pix([(x_deg, y_deg)], 0)
+    [ [xCent_pix, yCent_pix] ] = wcs2D.wcs_world2pix([(x_deg, y_deg)], 0)
     xCentInt_pix = round(xCent_pix)
     yCentInt_pix = round(yCent_pix)
 
@@ -1008,7 +1003,7 @@ def query_fits_map(header, data, x_deg, y_deg, doStrip=True, doApp=False,
     try:
         w = mkWCSDict(header)
         wcs = pw.WCS(w['header2D'])
-        [[x_pix, y_pix]] =  wcs.wcs_sky2pix([(x_deg, y_deg)], 0)
+        [[x_pix, y_pix]] =  wcs.wcs_world2pix([(x_deg, y_deg)], 0)
         dataValue = data[int(round(y_pix)), int(round(x_pix))]
         r_pix = r_deg / w['pixscale']
         if doApp:
