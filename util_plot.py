@@ -5,12 +5,13 @@
 #                                                                             #
 # PURPOSE:  Common function for plotting data.                                #
 #                                                                             #
-# MODIFIED: 14-May-2015 by C. Purcell                                         #
+# MODIFIED: 14-Oct-2015 by C. Purcell                                         #
 #                                                                             #
 # CONTENTS:                                                                   #
 #                                                                             #
 #  bin_xydata_errs ... bin X-Y data given a vector of bin edges               #
 #  mk_hist_poly    ... create line-segments for an open histogram             #
+# label_format_log ... format labels for a log plot                           #
 #                                                                             #
 #=============================================================================#
 import copy
@@ -64,7 +65,7 @@ def bin_xydata_errs(x, y, b, mode='mean'):
     else:
         for i in range(len(b)-1):
             n.append(len(binGrid[i]))
-            e.append(0.0)
+            e.append(m.sqrt(n[-1]))
 
     return b, n, e
 
@@ -103,3 +104,26 @@ def mk_hist_poly(bins, n, logScaleY=False, zeroPt=0.8, addZeroPt=True):
     polyCoords = np.array(polyCoordLst)
                         
     return polyCoords
+
+
+#-----------------------------------------------------------------------------#
+def label_format_log(switchExp=3.0):
+    """Return a function to format labels for log axes. Switches to power
+    format for numbers greater than switchExp power of 10."""    
+
+    def rfunc(num, pos=None):
+        if num > 0.0:
+            exponent = m.log10(num)
+            if exponent>=0:
+                if exponent<switchExp:
+                    return "%.0f" % num    
+                else:
+                    return r'$10^{%i}$' % (m.log10(num))
+            else:
+                if exponent>-switchExp:
+                    format_code = "%"+".%sf" % (str(abs(int(exponent))))
+                    return format_code % num
+                else:
+                    return r'$10^{%i}$' % (m.log10(num))
+    return rfunc
+                
