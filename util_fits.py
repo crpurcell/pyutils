@@ -565,8 +565,7 @@ def get_beam_from_history(header):
     bmaj = None
     bmin = None
     bpa = None
-    history = header.get_history()
-    history.reverse()
+    history = header["HISTORY"]
 
     #'AIPS   CLEAN BMAJ=  4.3403E-04 BMIN=  3.1039E-04 BPA= -11.55'
     beamHistStr = 'AIPS\s+CLEAN\sBMAJ=\s+(\S+)\s+BMIN=\s+(\S+)\s+BPA=\s+(\S+)'
