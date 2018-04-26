@@ -5,7 +5,7 @@
 #                                                                             #
 # PURPOSE:  Common functions for using mosaiced data.                         #
 #                                                                             #
-# MODIFIED: 14-May-2015 by C. Purcell                                         #
+# MODIFIED: 14-Feb-2018 by C. Purcell                                         #
 #                                                                             #
 # CONTENTS:                                                                   #
 #                                                                             #
@@ -24,7 +24,8 @@ import sys
 import re
 import commands
 import math as m
-import pyfits as pf
+#import pyfits as pf
+from astropy.io import fits as pf
 
 from util_misc import *
 

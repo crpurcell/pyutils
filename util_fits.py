@@ -5,7 +5,7 @@
 #                                                                             #
 # PURPOSE:  Utility functions to operate on FITS data.                        #
 #                                                                             #
-# MODIFIED: 17-Dec-2016 by C. Purcell                                         #
+# MODIFIED: 26-Apr-2018 by C. Purcell                                         #
 #                                                                             #
 # CONTENTS:                                                                   #
 #                                                                             #
@@ -565,8 +565,11 @@ def get_beam_from_history(header):
     bmaj = None
     bmin = None
     bpa = None
-    history = header["HISTORY"]
-
+    try:
+        history = header["HISTORY"]
+    except Exception:
+        return bmaj, bmin, bpa
+        
     #'AIPS   CLEAN BMAJ=  4.3403E-04 BMIN=  3.1039E-04 BPA= -11.55'
     beamHistStr = 'AIPS\s+CLEAN\sBMAJ=\s+(\S+)\s+BMIN=\s+(\S+)\s+BPA=\s+(\S+)'
     bmHistPat = re.compile(beamHistStr)
