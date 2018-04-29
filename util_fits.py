@@ -5,7 +5,7 @@
 #                                                                             #
 # PURPOSE:  Utility functions to operate on FITS data.                        #
 #                                                                             #
-# MODIFIED: 26-Apr-2018 by C. Purcell                                         #
+# MODIFIED: 29-Apr-2018 by C. Purcell                                         #
 #                                                                             #
 # CONTENTS:                                                                   #
 #                                                                             #
@@ -542,7 +542,7 @@ def calc_beam_area(header):
             bmin = 1.5 / 3600.0
         
     pixscaleX = header['CDELT1']
-    pixscaleX = header['CDELT2']
+    pixscaleY = header['CDELT2']
 
     # Convert FWHMs to sigma
     gfactor = 2.0 * m.sqrt(2.0 * m.log(2.0))  # FWHM=gfactor*sigma
